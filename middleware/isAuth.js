@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 
@@ -10,14 +12,19 @@ const isAuth = (req, res, next) => {
     const token = req.headers.authorization;
     if (token) {
       const decodedToken = jwt.verify(token, `${SECRET}`);
-      // @ts-ignore
-      req.Userdata = { email: decodedToken.email, userId: decodedToken.userId };
+      decodedToken
+        ? (req.Userdata = {
+            email: decodedToken.email,
+            userId: decodedToken.userId,
+          })
+        : res.staus(498).redirect('/auth');
       next();
     } else {
-      res.status(409).redirect('/auth');
+      res.status(400).redirect('/auth');
     }
   } catch (err) {
-    console.log(err);
+    res.status(404);
+    throw new Error(err);
   }
 };
 
